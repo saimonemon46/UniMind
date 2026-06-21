@@ -1,4 +1,26 @@
-# .gitignore
+﻿# .gitignore
 __pycache__/
 *.pyc
-config/settings/development.py  
+*.pyo
+*.pyd
+.Python
+.env
+.venv/
+venv/
+
+# Django
+*.sqlite3
+backend/db.sqlite3
+staticfiles/
+media/
+
+# Node / Vite
+node_modules/
+dist/
+frontend/dist/
+*.tsbuildinfo
+vite.config.d.ts
+
+# Local editor state
+.vscode/
+.idea/
