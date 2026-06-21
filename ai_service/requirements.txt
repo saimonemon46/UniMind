@@ -1,0 +1,8 @@
+fastapi==0.110.3
+uvicorn[standard]==0.30.6
+pydantic==2.8.2
+langchain==0.2.16
+langchain-core==0.2.38
+langchain-groq==0.1.9
+langgraph==0.2.19
+redis==5.0.8
