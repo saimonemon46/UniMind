@@ -29,3 +29,24 @@ class Program(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Semester(models.Model):
+    class Status(models.TextChoices):
+        UPCOMING = "upcoming", "Upcoming"
+        ACTIVE = "active", "Active"
+        COMPLETED = "completed", "Completed"
+
+    name = models.CharField(max_length=120)
+    code = models.CharField(max_length=30, unique=True)
+    starts_on = models.DateField()
+    ends_on = models.DateField()
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.UPCOMING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-starts_on", "name"]
+
+    def __str__(self):
+        return self.name
