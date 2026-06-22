@@ -27,6 +27,11 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "apps.departments",
     "apps.accounts",
+    "apps.courses",
+    "apps.attendance",
+    "apps.assignments",
+    "apps.grades",
+    "apps.messaging",
 ]
 
 MIDDLEWARE = [
@@ -117,3 +122,4 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 60 * 60 * 24,
     },
 }
+
