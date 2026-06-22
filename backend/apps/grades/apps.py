@@ -2,4 +2,8 @@ from django.apps import AppConfig
 
 
 class GradesConfig(AppConfig):
-    name = 'grades'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.grades"
+
+    def ready(self):
+        import apps.grades.signals  # noqa: F401
