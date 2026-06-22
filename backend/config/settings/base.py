@@ -65,12 +65,17 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-    )
-}
+if env.bool("USE_SQLITE", default=False):
+    DATABASES = {
+        "default": dj_database_url.parse(f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+    }
+else:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default="postgresql://alma:alma_secret@localhost:5432/unimind",
+            conn_max_age=600,
+        )
+    }
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
