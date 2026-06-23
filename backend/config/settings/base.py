@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "apps.assignments",
     "apps.grades",
     "apps.messaging",
+    
 ]
 
 MIDDLEWARE = [
