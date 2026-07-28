@@ -1,6 +1,6 @@
 from rest_framework import decorators, response, viewsets
 
-from apps.accounts.permissions import IsAdmin, IsAdminOrFaculty
+from apps.accounts.permissions import IsAdmin
 from apps.departments.views import AlmaModelViewSet
 from apps.accounts.serializers import UserSerializer
 
@@ -39,5 +39,6 @@ class EnrollmentViewSet(AlmaModelViewSet):
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAdminOrFaculty()]
+            return [IsAdmin()]
         return super().get_permissions()
+
