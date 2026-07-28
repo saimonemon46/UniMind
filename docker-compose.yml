@@ -1,6 +1,4 @@
-version: '3.9'
-
-services:
+﻿services:
   db:
     image: postgres:15-alpine
     environment:
@@ -9,24 +7,46 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-alma_secret}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alma -d unimind"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   redis:
     image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
 
   backend:
     build: ./backend
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh /app/entrypoint.sh
     volumes:
       - ./backend:/app
+      - ./docs:/docs
     environment:
       DATABASE_URL: postgresql://alma:${POSTGRES_PASSWORD:-alma_secret}@db:5432/unimind
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai_service:8001}
+      REDIS_URL: redis://redis:6379/0
+      AI_SERVICE_URL: http://ai_service:8001
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-secret-change-in-production}
-      DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
-    depends_on: [db, redis]
+      DJANGO_DEBUG: "True"
+      DEMO_DOCS_DIR: /docs
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend,nginx
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/admin/login/', timeout=3)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   celery_worker:
     build: ./backend
@@ -35,9 +55,12 @@ services:
       - ./backend:/app
     environment:
       DATABASE_URL: postgresql://alma:${POSTGRES_PASSWORD:-alma_secret}@db:5432/unimind
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai_service:8001}
-    depends_on: [db, redis, backend]
+      REDIS_URL: redis://redis:6379/0
+      AI_SERVICE_URL: http://ai_service:8001
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-secret-change-in-production}
+    depends_on:
+      backend:
+        condition: service_healthy
 
   celery_beat:
     build: ./backend
@@ -46,8 +69,11 @@ services:
       - ./backend:/app
     environment:
       DATABASE_URL: postgresql://alma:${POSTGRES_PASSWORD:-alma_secret}@db:5432/unimind
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-    depends_on: [db, redis, backend]
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-secret-change-in-production}
+    depends_on:
+      backend:
+        condition: service_healthy
 
   ai_service:
     build: ./ai_service
@@ -55,20 +81,35 @@ services:
     volumes:
       - ./ai_service:/app
     environment:
-      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
       REDIS_URL: redis://redis:6379/1
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8001:8001"
-    depends_on: [redis]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/ai/v1/health', timeout=3)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   frontend:
     build: ./frontend
     command: npm run dev -- --host 0.0.0.0
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
+    environment:
+      VITE_API_BASE_URL: /api/v1
+      VITE_API_PROXY_TARGET: http://backend:8000
     ports:
       - "5173:5173"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:5173 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   nginx:
     image: nginx:alpine
@@ -76,8 +117,16 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "80:80"
-    depends_on: [backend, frontend, ai_service]
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      ai_service:
+        condition: service_healthy
 
 volumes:
   postgres_data:
+  frontend_node_modules:
+
 
