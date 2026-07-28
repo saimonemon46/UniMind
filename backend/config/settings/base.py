@@ -1,4 +1,4 @@
-from datetime import timedelta
+﻿from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -27,11 +27,15 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "apps.departments",
     "apps.accounts",
+    "apps.students",
+    "apps.advisors",
+    "apps.analytics",
     "apps.courses",
     "apps.attendance",
     "apps.assignments",
     "apps.grades",
     "apps.messaging",
+    "apps.scheduling",
     
 ]
 
@@ -128,4 +132,6 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 60 * 60 * 24,
     },
 }
+
+
 
