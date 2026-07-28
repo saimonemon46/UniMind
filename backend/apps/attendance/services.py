@@ -1,4 +1,5 @@
-from django.db.models import Count, Q
+from django.db.models import Count
+from rest_framework.exceptions import PermissionDenied
 
 from .models import AttendanceRecord
 
@@ -17,12 +18,14 @@ class AttendanceService:
 
     @staticmethod
     def mark(serializer, user):
+        course = serializer.validated_data.get("course", getattr(serializer.instance, "course", None))
+        if user.role == "faculty" and course and course.faculty_id != user.id:
+            raise PermissionDenied("Faculty can mark attendance only for assigned courses.")
         return serializer.save(marked_by=user)
 
     @staticmethod
     def student_records(user, student_id):
-        qs = AttendanceService.queryset_for(user).filter(student_id=student_id)
-        return qs
+        return AttendanceService.queryset_for(user).filter(student_id=student_id)
 
     @staticmethod
     def course_records(user, course_id):
@@ -34,10 +37,4 @@ class AttendanceService:
         totals = records.values("status").annotate(count=Count("id")).order_by("status")
         total_count = records.count()
         present_count = records.filter(status__in=[AttendanceRecord.Status.PRESENT, AttendanceRecord.Status.LATE]).count()
-        return {
-            "course_id": course_id,
-            "total_records": total_count,
-            "present_or_late": present_count,
-            "attendance_rate": round((present_count / total_count) * 100, 2) if total_count else 0,
-            "by_status": list(totals),
-        }
+        return {"course_id": course_id, "total_records": total_count, "present_or_late": present_count, "attendance_rate": round((present_count / total_count) * 100, 2) if total_count else 0, "by_status": list(totals)}
