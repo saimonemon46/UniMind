@@ -8,6 +8,12 @@ class AttendanceRecordSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source="student.get_full_name", read_only=True)
     marked_by_name = serializers.CharField(source="marked_by.get_full_name", read_only=True)
 
+    def validate_class_date(self, value):
+        from django.utils import timezone
+        if value > timezone.localdate():
+            raise serializers.ValidationError("Cannot mark attendance for a future date.")
+        return value
+
     class Meta:
         model = AttendanceRecord
         fields = ["id", "course", "course_code", "student", "student_name", "marked_by", "marked_by_name", "class_date", "status", "notes", "created_at", "updated_at"]

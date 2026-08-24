@@ -16,6 +16,9 @@ class AttendanceRecordViewSet(AlmaModelViewSet):
     def perform_create(self, serializer):
         AttendanceService.mark(serializer, self.request.user)
 
+    def perform_update(self, serializer):
+        AttendanceService.mark(serializer, self.request.user)
+
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return [IsAdminOrFaculty()]
