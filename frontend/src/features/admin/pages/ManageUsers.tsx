@@ -3,18 +3,48 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchAllStudents } from '@/api/students.api'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card } from '@/components/ui/Card'
-import { Search, ArrowUpDown, UserCheck, ShieldAlert, Award, GraduationCap, User } from 'lucide-react'
+import { Search, ArrowUpDown, UserCheck, ShieldAlert, Award, GraduationCap, User, SlidersHorizontal, RefreshCw } from 'lucide-react'
 
 export function ManageUsers() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('name-asc')
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [selectedDept, setSelectedDept] = useState('')
+  const [selectedStanding, setSelectedStanding] = useState('')
+  const [selectedAdvisor, setSelectedAdvisor] = useState('')
+  const [minCgpa, setMinCgpa] = useState('')
+  const [maxCgpa, setMaxCgpa] = useState('')
+  const [minCredits, setMinCredits] = useState('')
+  const [maxCredits, setMaxCredits] = useState('')
 
   const { data: students = [], isLoading } = useQuery({
     queryKey: ['students'],
     queryFn: fetchAllStudents,
   })
 
-  // Filter students based on search term
+  // Dynamically extract unique departments, standings, and advisors for filters
+  const departments = Array.from(
+    new Set(students.map((student) => student.department_name).filter(Boolean))
+  ).sort()
+
+  const standings = Array.from(
+    new Set(students.map((student) => student.academic_standing).filter(Boolean))
+  ).sort()
+
+  const advisors = Array.from(
+    new Set(students.map((student) => student.advisor_name).filter(Boolean))
+  ).sort()
+
+  const activeFiltersCount =
+    (selectedDept ? 1 : 0) +
+    (selectedStanding ? 1 : 0) +
+    (selectedAdvisor ? 1 : 0) +
+    (minCgpa !== '' ? 1 : 0) +
+    (maxCgpa !== '' ? 1 : 0) +
+    (minCredits !== '' ? 1 : 0) +
+    (maxCredits !== '' ? 1 : 0)
+
+  // Filter students based on search term and advanced criteria
   const filteredStudents = students.filter((student) => {
     const s = searchTerm.toLowerCase()
     const fullName = `${student.user.first_name} ${student.user.last_name}`.toLowerCase()
@@ -25,7 +55,7 @@ export function ManageUsers() {
     const prog = (student.program_name || '').toLowerCase()
     const adv = (student.advisor_name || '').toLowerCase()
 
-    return (
+    const matchesSearch = (
       fullName.includes(s) ||
       username.includes(s) ||
       email.includes(s) ||
@@ -34,6 +64,33 @@ export function ManageUsers() {
       prog.includes(s) ||
       adv.includes(s)
     )
+
+    if (!matchesSearch) return false
+
+    // Advanced search filters
+    if (selectedDept && student.department_name !== selectedDept) return false
+    if (selectedStanding && student.academic_standing !== selectedStanding) return false
+    if (selectedAdvisor && student.advisor_name !== selectedAdvisor) return false
+
+    if (minCgpa !== '') {
+      const gpa = parseFloat(student.cgpa || '0')
+      if (gpa < parseFloat(minCgpa)) return false
+    }
+    if (maxCgpa !== '') {
+      const gpa = parseFloat(student.cgpa || '0')
+      if (gpa > parseFloat(maxCgpa)) return false
+    }
+
+    if (minCredits !== '') {
+      const creds = student.credits_completed || 0
+      if (creds < parseInt(minCredits, 10)) return false
+    }
+    if (maxCredits !== '') {
+      const creds = student.credits_completed || 0
+      if (creds > parseInt(maxCredits, 10)) return false
+    }
+
+    return true
   })
 
   // Sort filtered students based on selection
@@ -115,6 +172,23 @@ export function ManageUsers() {
           </div>
 
           <div className="flex gap-2">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className={`px-4 py-2 border rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
+                showAdvanced || activeFiltersCount > 0
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
+                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Advanced Filters
+              {activeFiltersCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-indigo-600 text-white rounded-full">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+
             <div className="relative">
               <ArrowUpDown className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
               <select
@@ -140,11 +214,156 @@ export function ManageUsers() {
           </div>
         </div>
 
+        {/* Collapsible Advanced Filters Panel */}
+        {showAdvanced && (
+          <div className="mb-6 p-5 border border-indigo-100 bg-indigo-50/10 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 transition-all">
+            {/* Department Filter */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Department</label>
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer h-9"
+              >
+                <option value="">All Departments</option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Academic Standing Filter */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Academic Standing</label>
+              <select
+                value={selectedStanding}
+                onChange={(e) => setSelectedStanding(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer h-9"
+              >
+                <option value="">All Standings</option>
+                {standings.map((standing) => (
+                  <option key={standing} value={standing}>{standing}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Advisor Filter */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Advisor</label>
+              <select
+                value={selectedAdvisor}
+                onChange={(e) => setSelectedAdvisor(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer h-9"
+              >
+                <option value="">All Advisors</option>
+                {advisors.map((adv) => (
+                  <option key={adv} value={adv}>{adv}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* CGPA Range Filter */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">CGPA Range</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4"
+                  placeholder="Min"
+                  value={minCgpa}
+                  onChange={(e) => setMinCgpa(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 h-9"
+                />
+                <span className="text-gray-400 text-xs">to</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4"
+                  placeholder="Max"
+                  value={maxCgpa}
+                  onChange={(e) => setMaxCgpa(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 h-9"
+                />
+              </div>
+            </div>
+
+            {/* Completed Credits Range Filter */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Credits Completed</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Min"
+                  value={minCredits}
+                  onChange={(e) => setMinCredits(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 h-9"
+                />
+                <span className="text-gray-400 text-xs">to</span>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Max"
+                  value={maxCredits}
+                  onChange={(e) => setMaxCredits(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 h-9"
+                />
+              </div>
+            </div>
+
+            {/* Action buttons (Clear) */}
+            <div className="sm:col-span-2 md:col-span-4 flex justify-end gap-2 pt-3 border-t border-indigo-100/50 mt-1">
+              <button
+                onClick={() => {
+                  setSelectedDept('')
+                  setSelectedStanding('')
+                  setSelectedAdvisor('')
+                  setMinCgpa('')
+                  setMaxCgpa('')
+                  setMinCredits('')
+                  setMaxCredits('')
+                  setSearchTerm('')
+                }}
+                disabled={activeFiltersCount === 0 && searchTerm === ''}
+                className="px-3.5 py-1.5 text-xs font-bold text-gray-500 hover:text-gray-800 disabled:opacity-40 transition-colors"
+              >
+                Reset All
+              </button>
+              <button
+                onClick={() => setShowAdvanced(false)}
+                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="py-8 text-center text-sm text-gray-500">Loading user accounts...</div>
         ) : sortedStudents.length === 0 ? (
           <div className="py-12 text-center text-sm text-gray-500 border border-dashed border-gray-200 rounded-xl bg-gray-50/30">
-            No matching accounts found for "{searchTerm}"
+            <div className="flex flex-col items-center justify-center gap-2">
+              <p>No matching accounts found for the current search and filter settings.</p>
+              <button
+                onClick={() => {
+                  setSelectedDept('')
+                  setSelectedStanding('')
+                  setSelectedAdvisor('')
+                  setMinCgpa('')
+                  setMaxCgpa('')
+                  setMinCredits('')
+                  setMaxCredits('')
+                  setSearchTerm('')
+                }}
+                className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 mt-2"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Clear All Search & Filters
+              </button>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
