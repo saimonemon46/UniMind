@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
       { index: true, element: <AdminDashboard /> }, { path: 'users', element: <ManageUsers /> }, { path: 'courses', element: <ManageCourses /> }, { path: 'departments', element: <ManageDepartments /> }, { path: 'schedules', element: <ManageSchedules /> }, { path: 'analytics', element: <InstitutionalAnalytics /> },
     ]},
     { path: 'faculty', element: <ProtectedRoute allowedRoles={['faculty']}><FacultyLayout /></ProtectedRoute>, children: [
-      { index: true, element: <FacultyDashboard /> }, { path: 'courses', element: <FacultyCourses /> }, { path: 'attendance', element: <AttendanceMarking /> }, { key: 'grades', path: 'grades', element: <GradeEntry /> }, { path: 'assignments', element: <AssignmentManager /> }, { path: 'schedule', element: <FacultySchedule /> }, { path: 'risk', element: <StudentRiskView /> },
+      { index: true, element: <FacultyDashboard /> }, { path: 'courses', element: <FacultyCourses /> }, { path: 'attendance', element: <AttendanceMarking /> }, { path: 'grades', element: <GradeEntry /> }, { path: 'assignments', element: <AssignmentManager /> }, { path: 'schedule', element: <FacultySchedule /> }, { path: 'risk', element: <StudentRiskView /> },
     ]},
     { path: 'student', element: <ProtectedRoute allowedRoles={['student']}><StudentLayout /></ProtectedRoute>, children: [
       { index: true, element: <StudentDashboard /> }, { path: 'courses', element: <StudentCourses /> }, { path: 'attendance', element: <MyAttendance /> }, { path: 'grades', element: <MyGrades /> }, { path: 'assignments', element: <Assignments /> }, { path: 'progress', element: <AcademicProgress /> }, { path: 'schedule', element: <StudentSchedule /> }, { path: 'tutoring', element: <AIRecommendations /> },

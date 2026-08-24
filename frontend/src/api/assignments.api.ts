@@ -15,9 +15,12 @@ export interface Submission {
   assignment: number
   student: number
   content: string
+  file_url?: string
   status: string
   score?: string
   feedback?: string
+  submitted_at: string
+  graded_by_name?: string
 }
 
 export async function fetchAssignments(): Promise<Assignment[]> {
@@ -34,4 +37,15 @@ export async function fetchSubmissions(): Promise<Submission[]> {
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.data)) return data.data
   return []
+}
+
+export async function uploadAttachment(file: File): Promise<{ file_url: string }> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await apiClient.post<{ file_url: string }>('/assignments/upload-attachment/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return res.data
 }

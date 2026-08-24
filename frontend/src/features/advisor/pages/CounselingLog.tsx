@@ -14,7 +14,7 @@ interface CounselingLogItem {
 }
 
 export function CounselingLog() {
-  const { data: logs = [], isLoading } = useQuery({
+  const { data: logs = [], isLoading } = useQuery<CounselingLogItem[]>({
     queryKey: ['counselingLogs'],
     queryFn: async () => {
       const res = await apiClient.get<any>('/advisors/logs/')

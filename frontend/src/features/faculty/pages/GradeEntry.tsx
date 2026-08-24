@@ -44,7 +44,7 @@ interface Envelope<T> {
   data: T
 }
 
-function gradeFromPercentage(value: number) {
+function gradeFromPercentage(value: number): [string, number] {
   if (value >= 80) return ['A+', 4.00]
   if (value >= 75) return ['A', 3.75]
   if (value >= 70) return ['A-', 3.50]

@@ -15,7 +15,7 @@ interface InterventionPlan {
 }
 
 export function InterventionPlans() {
-  const { data: plans = [], isLoading } = useQuery({
+  const { data: plans = [], isLoading } = useQuery<InterventionPlan[]>({
     queryKey: ['interventionPlans'],
     queryFn: async () => {
       const res = await apiClient.get<any>('/advisors/interventions/')

@@ -46,3 +46,23 @@ class SubmissionViewSet(AlmaModelViewSet):
             raise ValidationError({"message": "Score is required."})
         submission = SubmissionService.grade(self.get_object(), request.user, score, request.data.get("feedback", ""))
         return response.Response({"data": self.get_serializer(submission).data, "message": "Submission graded.", "success": True})
+
+
+from django.core.files.storage import default_storage
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
+class AttachmentUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        file_obj = request.FILES.get("file")
+        if not file_obj:
+            return response.Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        filename = default_storage.save(f"attachments/{file_obj.name}", file_obj)
+        file_url = f"/media/{filename}"
+        
+        return response.Response({"file_url": file_url}, status=status.HTTP_201_CREATED)
