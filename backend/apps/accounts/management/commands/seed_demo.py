@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from collections import Counter
 import os
@@ -18,7 +18,7 @@ from apps.assignments.models import Assignment, Submission
 from apps.attendance.models import AttendanceRecord
 from apps.courses.models import Course, Enrollment
 from apps.departments.models import Department, Program, Semester
-from apps.grades.models import Grade
+from apps.grades.models import Grade, AssessmentGrade
 from apps.messaging.models import Announcement, Notification
 from apps.scheduling.models import ClassSchedule, ExamSchedule, Room
 from apps.students.models import StudentProfile
@@ -211,11 +211,27 @@ class Command(BaseCommand):
                 AttendanceRecord.objects.update_or_create(course=enrollment.course, student=enrollment.student, class_date=class_date, defaults={"marked_by": enrollment.course.faculty, "status": RNG.choice(statuses), "notes": ""})
 
     def seed_grades(self, enrollments):
-        self.progress("Generating final grades...")
+        self.progress("Generating final grades and weighted assessment breakdowns...")
+        categories = [
+            ("Quiz 1", "quiz", Decimal("15.0")),
+            ("Midterm Examination", "midterm", Decimal("25.0")),
+            ("Practical Project", "project", Decimal("20.0")),
+            ("Final Examination", "final", Decimal("40.0")),
+        ]
         for enrollment in enrollments:
             percentage = Decimal(str(RNG.randint(52, 96)))
             letter, points = grade_for(percentage)
             Grade.objects.update_or_create(student=enrollment.student, course=enrollment.course, defaults={"graded_by": enrollment.course.faculty, "letter": letter, "points": points, "percentage": percentage, "remarks": "Demo final result generated from course assessment performance."})
+            
+            # Generate continuous assessment items
+            for title, cat, weight in categories:
+                score = Decimal(str(max(40, int(percentage) + RNG.randint(-10, 8))))
+                AssessmentGrade.objects.update_or_create(
+                    student=enrollment.student,
+                    course=enrollment.course,
+                    title=title,
+                    defaults={"category": cat, "weight_percentage": weight, "score_obtained": min(Decimal("100.00"), score), "max_score": Decimal("100.00")}
+                )
 
     def seed_messaging(self, admin, students, faculty, advisors):
         self.progress("Creating announcements and notifications...")

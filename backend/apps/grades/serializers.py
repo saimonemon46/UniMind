@@ -1,6 +1,11 @@
 from rest_framework import serializers
+from .models import Grade, AssessmentGrade
 
-from .models import Grade
+
+class AssessmentGradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssessmentGrade
+        fields = ["id", "student", "course", "title", "category", "weight_percentage", "score_obtained", "max_score", "created_at"]
 
 
 class GradeSerializer(serializers.ModelSerializer):
@@ -14,3 +19,4 @@ class GradeSerializer(serializers.ModelSerializer):
         model = Grade
         fields = ["id", "student", "student_name", "course", "course_code", "course_title", "credits", "graded_by", "graded_by_name", "letter", "points", "percentage", "remarks", "created_at", "updated_at"]
         read_only_fields = ["graded_by", "created_at", "updated_at"]
+

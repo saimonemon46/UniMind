@@ -19,3 +19,29 @@ class Grade(models.Model):
 
     def __str__(self):
         return f"{self.student} {self.letter} in {self.course}"
+
+
+class AssessmentGrade(models.Model):
+    class Category(models.TextChoices):
+        QUIZ = "quiz", "Quiz"
+        ASSIGNMENT = "assignment", "Assignment"
+        MIDTERM = "midterm", "Midterm Exam"
+        FINAL = "final", "Final Exam"
+        ATTENDANCE = "attendance", "Attendance & Conduct"
+        PROJECT = "project", "Practical Project"
+
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assessment_grades")
+    course = models.ForeignKey("courses.Course", on_delete=models.CASCADE, related_name="assessment_grades")
+    title = models.CharField(max_length=120)
+    category = models.CharField(max_length=20, choices=Category.choices, default=Category.ASSIGNMENT)
+    weight_percentage = models.DecimalField(max_digits=4, decimal_places=1, default=15.0)
+    score_obtained = models.DecimalField(max_digits=5, decimal_places=2)
+    max_score = models.DecimalField(max_digits=5, decimal_places=2, default=100.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["course", "category", "created_at"]
+
+    def __str__(self):
+        return f"{self.student.username} - {self.course.code} - {self.title}: {self.score_obtained}/{self.max_score}"
+
