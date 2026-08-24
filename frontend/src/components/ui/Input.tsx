@@ -8,10 +8,10 @@ export function Input({ label, id, className = '', ...props }: InputProps) {
   const inputId = id ?? label.toLowerCase().replace(/\s+/g, '-')
   return (
     <label htmlFor={inputId} className="block">
-      <span className="text-xs font-medium uppercase tracking-widest text-ink-30">{label}</span>
+      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">{label}</span>
       <input
         id={inputId}
-        className={`mt-2 w-full rounded-sm border border-ink-10 bg-white px-3 py-2 text-sm text-ink outline-none ring-terracotta/20 focus:ring-4 ${className}`}
+        className={`w-full rounded-xl border border-gray-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100/50 ${className}`}
         {...props}
       />
     </label>

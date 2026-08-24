@@ -12,9 +12,13 @@ export function RootLayout() {
         {user ? <Sidebar role={user.role} /> : null}
         <main className="min-w-0 flex-1">
           {user ? <Topbar /> : null}
-          <div className="mx-auto max-w-7xl px-5 py-6">
+          {user ? (
+            <div className="mx-auto max-w-7xl px-5 py-6">
+              <Outlet />
+            </div>
+          ) : (
             <Outlet />
-          </div>
+          )}
         </main>
       </div>
     </div>

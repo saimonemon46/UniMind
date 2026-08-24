@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { BarChart3, BookOpen, CalendarDays, ClipboardCheck, GraduationCap, LayoutDashboard, PencilLine, Users } from 'lucide-react'
+import { BarChart3, BookOpen, Bot, CalendarDays, ClipboardCheck, GraduationCap, LayoutDashboard, PencilLine, Users } from 'lucide-react'
 import type { Role } from '@/constants/roles'
 import { ROLE_ACCENTS } from '@/constants/roles'
 
@@ -14,7 +14,7 @@ const navItems: Record<Role, NavItem[]> = {
     { label: 'Dashboard', to: '/faculty', icon: LayoutDashboard }, { label: 'My courses', to: '/faculty/courses', icon: BookOpen }, { label: 'Attendance', to: '/faculty/attendance', icon: ClipboardCheck }, { label: 'Grade entry', to: '/faculty/grades', icon: PencilLine }, { label: 'Assignments', to: '/faculty/assignments', icon: GraduationCap }, { label: 'Schedule', to: '/faculty/schedule', icon: CalendarDays }, { label: 'Student insights', to: '/faculty/risk', icon: BarChart3 },
   ],
   student: [
-    { label: 'Dashboard', to: '/student', icon: LayoutDashboard }, { label: 'My courses', to: '/student/courses', icon: BookOpen }, { label: 'Attendance', to: '/student/attendance', icon: ClipboardCheck }, { label: 'Grades', to: '/student/grades', icon: PencilLine }, { label: 'Assignments', to: '/student/assignments', icon: GraduationCap }, { label: 'Timetable', to: '/student/schedule', icon: CalendarDays }, { label: 'Progress', to: '/student/progress', icon: BarChart3 },
+    { label: 'Dashboard', to: '/student', icon: LayoutDashboard }, { label: 'My courses', to: '/student/courses', icon: BookOpen }, { label: 'Attendance', to: '/student/attendance', icon: ClipboardCheck }, { label: 'Grades', to: '/student/grades', icon: PencilLine }, { label: 'Assignments', to: '/student/assignments', icon: GraduationCap }, { label: 'Timetable', to: '/student/schedule', icon: CalendarDays }, { label: 'Progress', to: '/student/progress', icon: BarChart3 }, { label: 'AI Tutor', to: '/student/tutoring', icon: Bot },
   ],
   advisor: [
     { label: 'Dashboard', to: '/advisor', icon: LayoutDashboard }, { label: 'Students', to: '/advisor/students', icon: Users }, { label: 'Plans', to: '/advisor/plans', icon: ClipboardCheck }, { label: 'Counseling', to: '/advisor/counseling', icon: BookOpen },

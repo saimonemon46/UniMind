@@ -1,15 +1,80 @@
-﻿import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/api/client'
+import { useQuery } from '@tanstack/react-query'
+import { fetchAssignments, fetchSubmissions } from '@/api/assignments.api'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card } from '@/components/ui/Card'
-
-interface Assignment { id: number; course_code: string; title: string; description: string; due_at: string; points: string }
-interface Submission { assignment: number; status: string; score: string | null }
-interface Envelope<T> { data: T }
+import { Calendar, FileCheck, Clock } from 'lucide-react'
 
 export function Assignments() {
-  const assignments = useQuery({ queryKey: ['assignments'], queryFn: async () => (await apiClient.get<Envelope<Assignment[]>>('/assignments/')).data.data })
-  const submissions = useQuery({ queryKey: ['submissions'], queryFn: async () => (await apiClient.get<Envelope<Submission[]>>('/submissions/')).data.data })
-  const byAssignment = new Map((submissions.data ?? []).map((item) => [item.assignment, item]))
-  return <><PageHeader label="Coursework" title="Assignments" /><div className="mt-5 grid gap-3">{(assignments.data ?? []).map((assignment) => { const submission = byAssignment.get(assignment.id); return <Card key={assignment.id} className="p-5"><div className="flex justify-between gap-4"><div><p className="text-xs font-medium uppercase tracking-widest text-ink-30">{assignment.course_code}</p><h2 className="mt-2 font-serif text-xl">{assignment.title}</h2><p className="mt-2 text-sm text-ink-60">Due {new Date(assignment.due_at).toLocaleString()} · {assignment.points} points</p></div><p className="text-sm capitalize text-ink-60">{submission?.status ?? 'Not submitted'}</p></div></Card>})}</div></>
+  const { data: assignments = [], isLoading: loadingAssignments } = useQuery({
+    queryKey: ['assignments'],
+    queryFn: fetchAssignments,
+  })
+
+  const { data: submissions = [] } = useQuery({
+    queryKey: ['submissions'],
+    queryFn: fetchSubmissions,
+  })
+
+  const submissionMap = new Map(submissions.map((sub) => [sub.assignment, sub]))
+
+  return (
+    <>
+      <PageHeader label="Coursework & Tasks" title="Assignments" />
+
+      {loadingAssignments ? (
+        <div className="mt-8 text-center text-sm text-gray-500">Loading assignments...</div>
+      ) : assignments.length === 0 ? (
+        <div className="mt-8 text-center text-sm text-gray-500">No active assignments posted.</div>
+      ) : (
+        <div className="mt-5 space-y-4">
+          {assignments.map((assignment) => {
+            const submission = submissionMap.get(assignment.id)
+            const isGraded = submission?.status === 'graded'
+            const isSubmitted = submission?.status === 'submitted' || isGraded
+
+            return (
+              <Card key={assignment.id} className="p-5 hover:shadow-md transition-shadow">
+                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                  <div>
+                    <span className="inline-block px-2.5 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700 uppercase tracking-wider mb-2">
+                      {assignment.course_code || 'COURSE'}
+                    </span>
+                    <h3 className="text-lg font-bold text-gray-900">{assignment.title}</h3>
+                    <p className="text-sm text-gray-600 mt-1">{assignment.description}</p>
+
+                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                        Due: {new Date(assignment.due_at).toLocaleDateString()}
+                      </span>
+                      <span className="font-medium text-gray-700">{assignment.points} Points Total</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {isGraded ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                        <FileCheck className="w-4 h-4 text-emerald-600" />
+                        Graded ({submission.score} pts)
+                      </span>
+                    ) : isSubmitted ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <FileCheck className="w-4 h-4 text-blue-600" />
+                        Submitted
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        <Clock className="w-4 h-4 text-amber-600" />
+                        Pending Submission
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
 }
