@@ -1,7 +1,7 @@
 # UniMind Demo Dataset
 
-Generated: 2026-07-28 18:44 UTC
-Generation time: 29.4 seconds
+Generated: 2026-08-20 11:21 UTC
+Generation time: 47.8 seconds
 
 ## Statistics
 
@@ -13,14 +13,14 @@ Generation time: 29.4 seconds
 - Students: 100
 - Advisors: 5
 - Enrollments: 500
-- Attendance records: 8009
+- Attendance records: 8000
 - Assignments: 165
 - Submissions: 1247
 - Grades: 500
 - Notifications: 215
 - Announcements: 10
 - Rooms: 10
-- Class schedules: 110
+- Class schedules: 111
 - Exam schedules: 55
 
 ## Notes
