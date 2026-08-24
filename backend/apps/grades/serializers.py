@@ -15,6 +15,11 @@ class GradeSerializer(serializers.ModelSerializer):
     credits = serializers.DecimalField(source="course.credits", max_digits=4, decimal_places=1, read_only=True)
     graded_by_name = serializers.CharField(source="graded_by.get_full_name", read_only=True)
 
+    def validate_percentage(self, value):
+        if value is not None and (value < 0 or value > 100):
+            raise serializers.ValidationError("Percentage must be between 0 and 100.")
+        return value
+
     class Meta:
         model = Grade
         fields = ["id", "student", "student_name", "course", "course_code", "course_title", "credits", "graded_by", "graded_by_name", "letter", "points", "percentage", "remarks", "created_at", "updated_at"]
