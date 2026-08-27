@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Use Case Diagram — UniMind Visual Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+    .card { background: #ffffff; color: #000; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    h1 { color: #38bdf8; }
+    .card h2 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .mermaid { display: flex; justify-content: center; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🎯 UniMind Use Case Diagram (Visual Actor & System Boundary Symbols)</h1>
+  <div class="card">
+    <h2>Actors, Subsystems & Use Cases</h2>
+    <div class="mermaid">
+graph TB
+    subgraph Actors
+        S[Student]
+        F[Faculty / Teacher]
+        ADV[Academic Advisor]
+        ADM[Administrator]
+        AI[AI Analytics Engine]
+    end
+
+    subgraph "UniMind System Boundary"
+        subgraph "Authentication & User Management"
+            UC_Auth["UC-1: Authenticate / Login (JWT)"]
+            UC_Profile["UC-2: Manage Profile & Roles"]
+        end
+
+        subgraph "Academic Administration"
+            UC_ManageDept["UC-3: Manage Departments & Programs"]
+            UC_ManageCourse["UC-4: Provision Courses & Sections"]
+            UC_ScheduleClass["UC-5: Manage Schedules & Rooms"]
+        end
+
+        subgraph "Course & Learning Management"
+            UC_Enroll["UC-6: Enroll in Courses"]
+            UC_ViewCourses["UC-7: View Enrolled Courses"]
+            UC_SubmitAssign["UC-8: Submit Assignment"]
+            UC_Grading["UC-9: Grade Submissions & Record Marks"]
+            UC_Attendance["UC-10: Mark Attendance"]
+        end
+
+        subgraph "AI Intelligence & Risk Management"
+            UC_RiskAssess["UC-11: Compute Academic At-Risk Score"]
+            UC_EarlyWarn["UC-12: Trigger Early Warning Notification"]
+            UC_GenLesson["UC-13: Generate Personal AI Lesson Plan"]
+            UC_AIChat["UC-14: Interact with AI Advisory Assistant"]
+        end
+
+        subgraph "Student Advising & Counseling"
+            UC_ManageIntervention["UC-15: Create & Track Intervention Plan"]
+            UC_LogCounseling["UC-16: Log Counseling Sessions"]
+            UC_ViewProgress["UC-17: View Academic Standing & Risk"]
+        end
+
+        subgraph "Messaging & Communication"
+            UC_Announce["UC-18: Broadcast System Announcements"]
+            UC_Notify["UC-19: View In-App Notifications"]
+        end
+    end
+
+    S --> UC_Auth
+    S --> UC_ViewCourses
+    S --> UC_SubmitAssign
+    S --> UC_GenLesson
+    S --> UC_AIChat
+    S --> UC_ViewProgress
+    S --> UC_Notify
+
+    F --> UC_Auth
+    F --> UC_Grading
+    F --> UC_Attendance
+    F --> UC_ViewProgress
+    F --> UC_Announce
+
+    ADV --> UC_Auth
+    ADV --> UC_ViewProgress
+    ADV --> UC_ManageIntervention
+    ADV --> UC_LogCounseling
+    ADV --> UC_Notify
+
+    ADM --> UC_Auth
+    ADM --> UC_Profile
+    ADM --> UC_ManageDept
+    ADM --> UC_ManageCourse
+    ADM --> UC_ScheduleClass
+    ADM --> UC_Announce
+
+    AI --> UC_RiskAssess
+    AI --> UC_EarlyWarn
+    AI --> UC_GenLesson
+    AI --> UC_AIChat
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>

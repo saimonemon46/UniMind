@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ER Diagram — UniMind Visual Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+    .card { background: #ffffff; color: #000; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    h1 { color: #38bdf8; }
+    .card h2 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .mermaid { display: flex; justify-content: center; margin-top: 20px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🗄️ UniMind Entity Relationship Diagram (Visual ER Symbols)</h1>
+  <div class="card">
+    <h2>Database Schema & Relational Links</h2>
+    <div class="mermaid">
+erDiagram
+    CustomUser ||--o| StudentProfile : "has profile"
+    CustomUser }|--|| Department : "belongs to"
+    CustomUser }|--o| CustomUser : "advised by"
+
+    Department ||--|{ Program : "offers"
+    Department ||--|{ Course : "hosts"
+    Program ||--|{ StudentProfile : "enrolls"
+
+    Course ||--|{ Enrollment : "has"
+    Course ||--|{ ClassSchedule : "scheduled in"
+    Course ||--|{ ExamSchedule : "has exams"
+    Course ||--|{ Assignment : "contains"
+
+    Semester ||--|{ Enrollment : "active in"
+    Semester ||--|{ ClassSchedule : "runs during"
+    Semester ||--|{ ExamSchedule : "runs during"
+
+    CustomUser ||--|{ Enrollment : "enrolled as student"
+    CustomUser ||--|{ ClassSchedule : "teaches as faculty"
+    CustomUser ||--|{ Assignment : "created by faculty"
+    CustomUser ||--|{ Submission : "submitted by student"
+
+    Enrollment ||--|{ Grade : "receives final"
+    Enrollment ||--|{ AssessmentGrade : "receives itemized"
+    Enrollment ||--|{ AttendanceRecord : "tracks"
+
+    ClassSchedule ||--|{ AttendanceRecord : "conducts session"
+    Room ||--|{ ClassSchedule : "hosts class"
+    Room ||--|{ ExamSchedule : "hosts exam"
+
+    Assignment ||--|{ Submission : "collects"
+
+    CustomUser ||--|{ InterventionPlan : "student targeted"
+    CustomUser ||--|{ CounselingLog : "counseled by advisor"
+    InterventionPlan ||--o| CounselingLog : "tracks progress"
+
+    CustomUser ||--|{ Notification : "receives"
+    CustomUser ||--|{ Announcement : "publishes"
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>

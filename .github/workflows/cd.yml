@@ -1,0 +1,47 @@
+name: UniMind Continuous Deployment (Debian)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Debian VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEBIAN_HOST }}
+          username: ${{ secrets.DEBIAN_USER }}
+          key: ${{ secrets.DEBIAN_SSH_KEY }}
+          port: ${{ secrets.DEBIAN_PORT || 22 }}
+          script: |
+            set -e
+            TARGET_DIR="${{ secrets.DEBIAN_TARGET_DIR }}"
+            TARGET_DIR="${TARGET_DIR:-/var/www/unimind}"
+            
+            echo "--> Navigating to project directory: $TARGET_DIR"
+            cd "$TARGET_DIR"
+            
+            echo "--> Pulling latest code from main branch..."
+            git fetch origin main
+            git reset --hard origin/main
+            
+            echo "--> Rebuilding and starting Docker containers..."
+            docker compose down --remove-orphans || true
+            docker compose up -d --build
+            
+            echo "--> Running Django database migrations..."
+            docker compose exec -T backend python manage.py migrate --noinput
+            
+            echo "--> Collecting static files..."
+            docker compose exec -T backend python manage.py collectstatic --noinput
+            
+            echo "--> Cleaning up unused Docker images..."
+            docker image prune -f
+            
+            echo "--> Deployment finished successfully!"

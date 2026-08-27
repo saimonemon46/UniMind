@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Data Flow Diagrams (DFD) — UniMind Visual Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+    .card { background: #ffffff; color: #000; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    h1, h2 { color: #38bdf8; }
+    .card h2 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .mermaid { display: flex; justify-content: center; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🔀 UniMind Data Flow Diagrams (DFD Symbols: Entities, Processes, Data Stores)</h1>
+
+  <div class="card">
+    <h2>1. DFD Level 0 (Context Diagram)</h2>
+    <div class="mermaid">
+graph TD
+    STUDENT[External Entity: Student]
+    FACULTY[External Entity: Faculty / Teacher]
+    ADVISOR[External Entity: Academic Advisor]
+    ADMIN[External Entity: Administrator]
+    GROQ_API[External Entity: Groq LLM API]
+
+    UNIMIND((0.0 UniMind System: University Management & AI Advisory))
+
+    STUDENT -- Login Credentials, Submissions, Chat Prompts --> UNIMIND
+    UNIMIND -- Course Schedule, Grades, Risk Status, AI Study Plans --> STUDENT
+
+    FACULTY -- Attendance Entries, Assessment Grades, Assignments --> UNIMIND
+    UNIMIND -- Class Roster, Submissions, Course Performance Analytics --> FACULTY
+
+    ADVISOR -- Counseling Logs, Intervention Plans --> UNIMIND
+    UNIMIND -- At-Risk Student Lists, Early Warning Alerts --> ADVISOR
+
+    ADMIN -- Depts, Course Offerings, Room Schedules, Users --> UNIMIND
+    UNIMIND -- System Audit Logs, Institutional Analytics --> ADMIN
+
+    UNIMIND -- Telemetry & Context Prompts --> GROQ_API
+    GROQ_API -- Risk Classification JSON & AI Lesson Content --> UNIMIND
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. DFD Level 1 (Process Decomposition Diagram)</h2>
+    <div class="mermaid">
+graph TB
+    E_Student[Student]
+    E_Faculty[Faculty]
+    E_Advisor[Advisor]
+    E_Admin[Admin]
+    E_Groq[Groq LLM API]
+
+    P1((1.0 Auth & User Mgmt))
+    P2((2.0 Dept & Course Provisioning))
+    P3((3.0 Enrollment & Scheduling))
+    P4((4.0 Attendance & Assessment))
+    P5((5.0 AI Risk Analytics Engine))
+    P6((6.0 Advisor Counseling))
+    P7((7.0 Messaging & Notifications))
+
+    DS1[(D1: Users Store)]
+    DS2[(D2: Courses Store)]
+    DS3[(D3: Submissions & Grades)]
+    DS4[(D4: Attendance Store)]
+    DS5[(D5: Risk & Interventions)]
+    DS6[(D6: AI Memory Cache)]
+
+    E_Admin --> P1 --> DS1
+    E_Admin --> P2 --> DS2
+    E_Student --> P3 --> DS2
+    E_Faculty --> P4 --> DS3
+    E_Faculty --> P4 --> DS4
+    E_Student --> P4 --> DS3
+    DS3 --> P5
+    DS4 --> P5
+    DS1 --> P5
+    P5 <--> E_Groq
+    P5 --> DS5
+    P5 --> DS6
+    P5 --> P7
+    DS5 --> P6
+    E_Advisor --> P6 --> DS5
+    P7 --> E_Student
+    P7 --> E_Advisor
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>

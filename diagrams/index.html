@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniMind System Architecture Diagrams — Visual Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --border: #334155;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 300px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 6px 0 0 0;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 12px;
+      margin: 0;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .nav-item {
+      padding: 12px 14px;
+      margin-bottom: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      color: var(--text-muted);
+    }
+
+    .nav-item:hover {
+      background-color: rgba(56, 189, 248, 0.1);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background-color: var(--accent);
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    /* Main Diagram Viewport */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-secondary);
+    }
+
+    .topbar-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      background-color: #334155;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #475569;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #0f172a;
+      border: none;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      color: #fff;
+    }
+
+    .viewport {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .diagram-card {
+      background-color: #ffffff;
+      color: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 1200px;
+      min-height: 500px;
+      overflow: auto;
+    }
+
+    .diagram-card h2 {
+      margin-top: 0;
+      color: #0f172a;
+      font-size: 1.4rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h1>🎓 UniMind Architecture</h1>
+      <p>Interactive Graphical Diagram Viewer</p>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchDiagram('usecase')">🎯 Use Case Diagram</li>
+      <li class="nav-item" onclick="switchDiagram('erd')">🗄️ Entity Relationship (ERD)</li>
+      <li class="nav-item" onclick="switchDiagram('seq1')">⚡ Sequence 1: At-Risk AI Alert</li>
+      <li class="nav-item" onclick="switchDiagram('seq2')">⚡ Sequence 2: Assignment AI Grade</li>
+      <li class="nav-item" onclick="switchDiagram('seq3')">⚡ Sequence 3: AI Advisory Chatbot</li>
+      <li class="nav-item" onclick="switchDiagram('act1')">🔄 Activity 1: Early Warning Flow</li>
+      <li class="nav-item" onclick="switchDiagram('act2')">🔄 Activity 2: Attendance & Grading</li>
+      <li class="nav-item" onclick="switchDiagram('act3')">🔄 Activity 3: Course Registration</li>
+      <li class="nav-item" onclick="switchDiagram('swim1')">🏊 Swimlane 1: At-Risk Resolution</li>
+      <li class="nav-item" onclick="switchDiagram('swim2')">🏊 Swimlane 2: Assessment Lifecycle</li>
+      <li class="nav-item" onclick="switchDiagram('dfd0')">🔀 DFD Level 0 (Context)</li>
+      <li class="nav-item" onclick="switchDiagram('dfd1')">🔀 DFD Level 1 (Decomposition)</li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <h2 class="topbar-title" id="diagram-title">Use Case Diagram</h2>
+      <div class="controls">
+        <button class="btn" onclick="zoomIn()">Zoom In (+)</button>
+        <button class="btn" onclick="zoomOut()">Zoom Out (-)</button>
+        <button class="btn btn-primary" onclick="downloadSVG()">Download SVG Diagram</button>
+      </div>
+    </div>
+    <div class="viewport">
+      <div class="diagram-card" id="diagram-container">
+        <h2 id="card-title">Use Case Diagram</h2>
+        <div class="mermaid" id="mermaid-target"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { curve: 'basis' },
+      sequence: { showSequenceNumbers: true }
+    });
+
+    const diagrams = {
+      usecase: {
+        title: "Use Case Diagram — Actors & System Boundaries",
+        code: `graph TB
+    subgraph Actors
+        S[Student]
+        F[Faculty / Teacher]
+        ADV[Academic Advisor]
+        ADM[Administrator]
+        AI[AI Analytics Engine]
+    end
+
+    subgraph "UniMind System Boundary"
+        subgraph "Authentication & User Management"
+            UC_Auth["UC-1: Authenticate / Login (JWT)"]
+            UC_Profile["UC-2: Manage Profile & Roles"]
+        end
+
+        subgraph "Academic Administration"
+            UC_ManageDept["UC-3: Manage Departments & Programs"]
+            UC_ManageCourse["UC-4: Provision Courses & Sections"]
+            UC_ScheduleClass["UC-5: Manage Schedules & Rooms"]
+        end
+
+        subgraph "Course & Learning Management"
+            UC_Enroll["UC-6: Enroll in Courses"]
+            UC_ViewCourses["UC-7: View Enrolled Courses"]
+            UC_SubmitAssign["UC-8: Submit Assignment"]
+            UC_Grading["UC-9: Grade Submissions & Record Marks"]
+            UC_Attendance["UC-10: Mark Attendance"]
+        end
+
+        subgraph "AI Intelligence & Risk Management"
+            UC_RiskAssess["UC-11: Compute Academic At-Risk Score"]
+            UC_EarlyWarn["UC-12: Trigger Early Warning Notification"]
+            UC_GenLesson["UC-13: Generate Personal AI Lesson Plan"]
+            UC_AIChat["UC-14: Interact with AI Advisory Assistant"]
+        end
+
+        subgraph "Student Advising & Counseling"
+            UC_ManageIntervention["UC-15: Create & Track Intervention Plan"]
+            UC_LogCounseling["UC-16: Log Counseling Sessions"]
+            UC_ViewProgress["UC-17: View Academic Standing & Risk"]
+        end
+
+        subgraph "Messaging & Communication"
+            UC_Announce["UC-18: Broadcast System Announcements"]
+            UC_Notify["UC-19: View In-App Notifications"]
+        end
+    end
+
+    S --> UC_Auth
+    S --> UC_ViewCourses
+    S --> UC_SubmitAssign
+    S --> UC_GenLesson
+    S --> UC_AIChat
+    S --> UC_ViewProgress
+    S --> UC_Notify
+
+    F --> UC_Auth
+    F --> UC_Grading
+    F --> UC_Attendance
+    F --> UC_ViewProgress
+    F --> UC_Announce
+
+    ADV --> UC_Auth
+    ADV --> UC_ViewProgress
+    ADV --> UC_ManageIntervention
+    ADV --> UC_LogCounseling
+    ADV --> UC_Notify
+
+    ADM --> UC_Auth
+    ADM --> UC_Profile
+    ADM --> UC_ManageDept
+    ADM --> UC_ManageCourse
+    ADM --> UC_ScheduleClass
+    ADM --> UC_Announce
+
+    AI --> UC_RiskAssess
+    AI --> UC_EarlyWarn
+    AI --> UC_GenLesson
+    AI --> UC_AIChat`
+      },
+      erd: {
+        title: "Entity Relationship Diagram (ERD)",
+        code: `erDiagram
+    CustomUser ||--o| StudentProfile : "has profile"
+    CustomUser }|--|| Department : "belongs to"
+    CustomUser }|--o| CustomUser : "advised by"
+
+    Department ||--|{ Program : "offers"
+    Department ||--|{ Course : "hosts"
+    Program ||--|{ StudentProfile : "enrolls"
+
+    Course ||--|{ Enrollment : "has"
+    Course ||--|{ ClassSchedule : "scheduled in"
+    Course ||--|{ ExamSchedule : "has exams"
+    Course ||--|{ Assignment : "contains"
+
+    Semester ||--|{ Enrollment : "active in"
+    Semester ||--|{ ClassSchedule : "runs during"
+    Semester ||--|{ ExamSchedule : "runs during"
+
+    CustomUser ||--|{ Enrollment : "enrolled as student"
+    CustomUser ||--|{ ClassSchedule : "teaches as faculty"
+    CustomUser ||--|{ Assignment : "created by faculty"
+    CustomUser ||--|{ Submission : "submitted by student"
+
+    Enrollment ||--|{ Grade : "receives final"
+    Enrollment ||--|{ AssessmentGrade : "receives itemized"
+    Enrollment ||--|{ AttendanceRecord : "tracks"
+
+    ClassSchedule ||--|{ AttendanceRecord : "conducts session"
+    Room ||--|{ ClassSchedule : "hosts class"
+    Room ||--|{ ExamSchedule : "hosts exam"
+
+    Assignment ||--|{ Submission : "collects"
+
+    CustomUser ||--|{ InterventionPlan : "student targeted"
+    CustomUser ||--|{ CounselingLog : "counseled by advisor"
+    InterventionPlan ||--o| CounselingLog : "tracks progress"
+
+    CustomUser ||--|{ Notification : "receives"
+    CustomUser ||--|{ Announcement : "publishes"`
+      },
+      seq1: {
+        title: "Sequence Diagram 1: AI At-Risk Evaluation & Advisor Early Warning",
+        code: `sequenceDiagram
+    autonumber
+    actor Student
+    participant UI as React Frontend UI
+    participant Backend as Django REST API
+    participant DB as PostgreSQL Database
+    participant Celery as Async Celery Worker
+    participant AI as FastAPI AI Service
+    participant Groq as Groq LLM API
+    actor Advisor
+
+    Student->>UI: Misses classes / Scores low on exam
+    UI->>Backend: POST /api/attendance/ or POST /api/grades/
+    Backend->>DB: Save AttendanceRecord / AssessmentGrade
+    Backend->>Celery: Trigger evaluate_student_risk_task(student_id)
+    
+    activate Celery
+    Celery->>DB: Query student attendance %, CGPA, grades
+    DB-->>Celery: Return academic telemetry
+    Celery->>AI: POST /ai/risk/evaluate (student payload)
+    
+    activate AI
+    AI->>Groq: Execute risk analysis prompt
+    Groq-->>AI: Return JSON (risk_score=0.78, level="HIGH")
+    AI-->>Celery: Return Risk Assessment Result
+    deactivate AI
+    
+    Celery->>DB: Update StudentProfile.risk_level = "HIGH"
+    Celery->>DB: Create Notification(recipient=Advisor, kind="RISK_ALERT")
+    deactivate Celery
+
+    Advisor->>UI: Open Advisor Dashboard
+    UI->>Backend: GET /api/advisors/assigned-students/
+    Backend->>DB: Query at-risk students
+    DB-->>Backend: Return at-risk list
+    Backend-->>UI: Display At-Risk Banner & Badges`
+      },
+      seq2: {
+        title: "Sequence Diagram 2: Student Assignment Submission & AI Feedback",
+        code: `sequenceDiagram
+    autonumber
+    actor Student
+    participant UI as React Student Portal
+    participant API as Django REST API
+    participant Storage as File Storage (MinIO)
+    participant DB as PostgreSQL DB
+    participant AI as FastAPI AI Service
+    participant Groq as Groq LLM API
+
+    Student->>UI: Select Assignment & Upload Solution
+    UI->>API: POST /api/assignments/{id}/submit/
+    API->>Storage: Store Submission File
+    Storage-->>API: Return file_url
+    API->>DB: Create Submission (status="SUBMITTED")
+    DB-->>API: Saved Submission instance
+
+    opt Real-time AI Feedback Generation
+        API->>AI: POST /ai/lessons/evaluate-submission
+        activate AI
+        AI->>Groq: Generate feedback & score recommendation
+        Groq-->>AI: Return feedback & recommended score
+        AI-->>API: Feedback payload
+        deactivate AI
+        API->>DB: Update Submission (feedback=AI_feedback, status="GRADED")
+    end
+
+    API-->>UI: 201 Created (Submission Success + AI Feedback)
+    UI-->>Student: Display "Submitted" status with AI feedback`
+      },
+      seq3: {
+        title: "Sequence Diagram 3: AI Advisory Chatbot Interaction",
+        code: `sequenceDiagram
+    autonumber
+    actor Student
+    participant Chat as React AIAssistant Widget
+    participant FastApiAI as FastAPI Microservice
+    participant RedisMemory as Redis Cache
+    participant LangChain as LangChain Agent
+    participant Groq as Groq LLM API
+
+    Student->>Chat: Type query ("What prerequisites do I need for Machine Learning?")
+    Chat->>FastApiAI: POST /ai/chatbot/query
+    activate FastApiAI
+    FastApiAI->>RedisMemory: GET chat_history:{session_id}
+    RedisMemory-->>FastApiAI: Return prior turns
+    FastApiAI->>LangChain: Execute Prompt with Context + Query
+    LangChain->>Groq: POST completions API
+    Groq-->>LangChain: Streamed text response
+    LangChain-->>FastApiAI: Compiled response
+    FastApiAI->>RedisMemory: UPDATE chat_history (append turn)
+    FastApiAI-->>Chat: JSON Response
+    deactivate FastApiAI
+    Chat-->>Student: Render response in Markdown`
+      },
+      act1: {
+        title: "Activity Diagram 1: Early Warning & Risk Analysis Workflow",
+        code: `flowchart TD
+    Start([Start: Risk Evaluation Triggered]) --> FetchData[Fetch Student Telemetry: Attendance, Submissions, Grades]
+    FetchData --> InvokeAI[Invoke FastAPI AI Risk Agent]
+    InvokeAI --> CalculateScore[Calculate At-Risk Score: 0.0 - 1.0]
+
+    CalculateScore --> RiskCheck{Risk Level?}
+    
+    RiskCheck -- Score < 0.40 --> LowRisk[Mark Student as LOW Risk]
+    LowRisk --> StandardReport[Log standard academic progress]
+    StandardReport --> EndRoutine([End Workflow])
+
+    RiskCheck -- 0.40 <= Score < 0.70 --> MedRisk[Mark Student as MEDIUM Risk]
+    MedRisk --> GenRecommend[AI Engine Generates Study Recommendations]
+    GenRecommend --> SendStudAlert[Send Advisory Tip to Student]
+    SendStudAlert --> NotifyAdvMed[Notify Assigned Advisor: Monitor Mode]
+    NotifyAdvMed --> EndRoutine
+
+    RiskCheck -- Score >= 0.70 --> HighRisk[Mark Student as HIGH Risk]
+    HighRisk --> TriggerUrgent[Trigger Early Warning Alert]
+    TriggerUrgent --> NotifyAdvHigh[Send Urgent Alert to Academic Advisor]
+    NotifyAdvHigh --> DraftPlan[Advisor Drafts Intervention Plan]
+    DraftPlan --> ScheduleCounseling[Schedule Counseling Session]
+    ScheduleCounseling --> ExecuteIntervention[Execute & Log Counseling Notes]
+    ExecuteIntervention --> CompletePlan[Mark Plan Status: COMPLETED]
+    CompletePlan --> EndRoutine`
+      },
+      act2: {
+        title: "Activity Diagram 2: Attendance & Grade Submission Workflow",
+        code: `flowchart TD
+    Start([Start: Faculty Accesses Portal]) --> SelectCourse[Select Assigned Course & Session]
+    SelectCourse --> ActionType{Select Action}
+    
+    ActionType -- Mark Attendance --> FetchRoster[System Fetches Student Roster]
+    FetchRoster --> DisplayAttendanceUI[Render Interactive Attendance Sheet]
+    DisplayAttendanceUI --> InputAttendance[Faculty Marks: Present / Absent / Late / Excused]
+    InputAttendance --> SubmitAttendance[Click Save Attendance]
+    SubmitAttendance --> PersistAtt[Persist AttendanceRecords in PostgreSQL]
+    PersistAtt --> EndAtt([Attendance Workflow Complete])
+
+    ActionType -- Submit Grades --> SelectAssessment[Select Assessment Category]
+    SelectAssessment --> DisplayGradeUI[Render Grade Input Table]
+    DisplayGradeUI --> EnterScores[Faculty Enters Scores per Student]
+    EnterScores --> SubmitGrades[Click Publish Grades]
+    SubmitGrades --> PersistGrades[Save AssessmentGrade / Grade Records]
+    PersistGrades --> TriggerRiskEval[Trigger Async Risk Evaluation for Low Scorers]
+    TriggerRiskEval --> EndGrade([Grade Workflow Complete])`
+      },
+      act3: {
+        title: "Activity Diagram 3: Student Course Registration Workflow",
+        code: `flowchart TD
+    Start([Start: Student Initiates Registration]) --> OpenCatalog[Browse Available Courses for Active Semester]
+    OpenCatalog --> SelectCourse[Select Course to Add]
+    SelectCourse --> CheckPrereq{Prerequisites Satisfied?}
+    
+    CheckPrereq -- No --> PrereqErr[Display Warning: Missing Prerequisite]
+    PrereqErr --> OpenCatalog
+
+    CheckPrereq -- Yes --> CheckCapacity{Class Seat Available?}
+    CheckCapacity -- No --> CapErr[Display Notice: Section Full]
+    CapErr --> OpenCatalog
+
+    CheckCapacity -- Yes --> CheckScheduleConflict{Time Conflict with Enrolled Class?}
+    CheckScheduleConflict -- Yes --> ConflictErr[Display Error: Schedule Overlap]
+    ConflictErr --> OpenCatalog
+
+    CheckScheduleConflict -- No --> CreateEnrollment[Create Enrollment record status='ACTIVE']
+    CreateEnrollment --> DisplaySchedule[Refresh Personal Class Timetable]
+    DisplaySchedule --> ConfirmReg([Registration Complete])`
+      },
+      swim1: {
+        title: "Swimlane Diagram 1: At-Risk Early Warning & Advisory Execution",
+        code: `flowchart TB
+    subgraph Student
+        S1[Misses consecutive classes / Low exam score]
+        S2[Receives counseling request & notification]
+        S3[Attends Counseling Session with Advisor]
+    end
+
+    subgraph Faculty
+        F1[Enters Attendance ABSENT / Grade F]
+    end
+
+    subgraph "System Backend (Django)"
+        B1[Saves Attendance / Grade Records]
+        B2[Enqueues Async Risk Evaluation Task]
+        B3[Updates StudentProfile risk_level = HIGH]
+        B4[Sends In-App Alert to Assigned Advisor]
+        B5[Recalculates Risk Level = LOW after recovery]
+    end
+
+    subgraph "AI Engine (FastAPI)"
+        AI1[Retrieves Telemetry & Runs LangGraph Risk Agent]
+        AI2[Flags Student Risk Level = HIGH]
+    end
+
+    subgraph Academic Advisor
+        A1[Receives High-Risk Alert on Dashboard]
+        A2[Drafts Intervention Plan with Goals]
+        A3[Conducts Counseling Session & Logs Notes]
+        A4[Updates Intervention Plan status to COMPLETED]
+    end
+
+    S1 --> F1 --> B1 --> B2 --> AI1 --> AI2 --> B3 --> B4 --> A1 --> A2 --> S2 --> S3 --> A3 --> A4 --> B5`
+      },
+      swim2: {
+        title: "Swimlane Diagram 2: Assessment Creation, Submission & AI Grading",
+        code: `flowchart TB
+    subgraph Faculty
+        F1[Creates Assignment with title, max points, due date]
+        F2[Reviews student submission & AI grade suggestion]
+        F3[Approves final grade & clicks Publish]
+    end
+
+    subgraph "System Database"
+        D1[Stores Assignment record & notifies students]
+        D2[Stores Submission record status=SUBMITTED]
+        D3[Stores AI feedback & score draft]
+        D4[Saves final Grade & sends notification to Student]
+    end
+
+    subgraph Student
+        S1[Views Assignment on Student Portal]
+        S2[Submits solution file before due date]
+        S3[Receives notification & views final grade]
+    end
+
+    subgraph "AI Assistant Service"
+        AI1[Analyzes submission text using Groq LLM]
+        AI2[Generates recommended score & constructive feedback]
+    end
+
+    F1 --> D1 --> S1 --> S2 --> D2 --> AI1 --> AI2 --> D3 --> F2 --> F3 --> D4 --> S3`
+      },
+      dfd0: {
+        title: "Data Flow Diagram Level 0 (Context Diagram)",
+        code: `graph TD
+    STUDENT[External Entity: Student]
+    FACULTY[External Entity: Faculty / Teacher]
+    ADVISOR[External Entity: Academic Advisor]
+    ADMIN[External Entity: Administrator]
+    GROQ_API[External Entity: Groq LLM API]
+
+    UNIMIND((0.0 UniMind System: University Management & AI Advisory))
+
+    STUDENT -- Login Credentials, Submissions, Chat Prompts --> UNIMIND
+    UNIMIND -- Course Schedule, Grades, Risk Status, AI Study Plans --> STUDENT
+
+    FACULTY -- Attendance Entries, Assessment Grades, Assignments --> UNIMIND
+    UNIMIND -- Class Roster, Submissions, Course Performance Analytics --> FACULTY
+
+    ADVISOR -- Counseling Logs, Intervention Plans --> UNIMIND
+    UNIMIND -- At-Risk Student Lists, Early Warning Alerts --> ADVISOR
+
+    ADMIN -- Depts, Course Offerings, Room Schedules, Users --> UNIMIND
+    UNIMIND -- System Audit Logs, Institutional Analytics --> ADMIN
+
+    UNIMIND -- Telemetry & Context Prompts --> GROQ_API
+    GROQ_API -- Risk Classification JSON & AI Lesson Content --> UNIMIND`
+      },
+      dfd1: {
+        title: "Data Flow Diagram Level 1 (Process Decomposition)",
+        code: `graph TB
+    E_Student[Student]
+    E_Faculty[Faculty]
+    E_Advisor[Advisor]
+    E_Admin[Admin]
+    E_Groq[Groq LLM API]
+
+    P1((1.0 Auth & User Mgmt))
+    P2((2.0 Dept & Course Provisioning))
+    P3((3.0 Enrollment & Scheduling))
+    P4((4.0 Attendance & Assessment))
+    P5((5.0 AI Risk Analytics Engine))
+    P6((6.0 Advisor Counseling))
+    P7((7.0 Messaging & Notifications))
+
+    DS1[(D1: Users Store)]
+    DS2[(D2: Courses Store)]
+    DS3[(D3: Submissions & Grades)]
+    DS4[(D4: Attendance Store)]
+    DS5[(D5: Risk & Interventions)]
+    DS6[(D6: AI Memory Cache)]
+
+    E_Admin --> P1 --> DS1
+    E_Admin --> P2 --> DS2
+    E_Student --> P3 --> DS2
+    E_Faculty --> P4 --> DS3
+    E_Faculty --> P4 --> DS4
+    E_Student --> P4 --> DS3
+    DS3 --> P5
+    DS4 --> P5
+    DS1 --> P5
+    P5 <--> E_Groq
+    P5 --> DS5
+    P5 --> DS6
+    P5 --> P7
+    DS5 --> P6
+    E_Advisor --> P6 --> DS5
+    P7 --> E_Student
+    P7 --> E_Advisor`
+      }
+    };
+
+    let currentZoom = 1.0;
+
+    async function renderDiagram(key) {
+      const diag = diagrams[key];
+      if (!diag) return;
+      
+      document.getElementById('diagram-title').innerText = diag.title;
+      document.getElementById('card-title').innerText = diag.title;
+      const target = document.getElementById('mermaid-target');
+      target.removeAttribute('data-processed');
+      
+      try {
+        const { svg } = await mermaid.render('render-' + key, diag.code);
+        target.innerHTML = svg;
+      } catch (err) {
+        console.error(err);
+        target.innerHTML = "<pre style='color:red;'>" + err.toString() + "</pre>";
+      }
+    }
+
+    function switchDiagram(key) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+      currentZoom = 1.0;
+      document.getElementById('diagram-container').style.transform = 'scale(1)';
+      renderDiagram(key);
+    }
+
+    function zoomIn() {
+      currentZoom += 0.15;
+      document.getElementById('diagram-container').style.transform = `scale(${currentZoom})`;
+      document.getElementById('diagram-container').style.transformOrigin = 'top center';
+    }
+
+    function zoomOut() {
+      if (currentZoom > 0.4) {
+        currentZoom -= 0.15;
+        document.getElementById('diagram-container').style.transform = `scale(${currentZoom})`;
+        document.getElementById('diagram-container').style.transformOrigin = 'top center';
+      }
+    }
+
+    function downloadSVG() {
+      const svgElement = document.querySelector('#mermaid-target svg');
+      if (!svgElement) {
+        alert("Diagram is not rendered yet.");
+        return;
+      }
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "UniMind_Diagram.svg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Initial render
+    window.addEventListener('DOMContentLoaded', () => {
+      renderDiagram('usecase');
+    });
+  </script>
+</body>
+</html>

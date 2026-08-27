@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Activity Diagrams — UniMind Visual Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+    .card { background: #ffffff; color: #000; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    h1, h2 { color: #38bdf8; }
+    .card h2 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .mermaid { display: flex; justify-content: center; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🔄 UniMind Activity Diagrams (Flowchart & Decision Symbols)</h1>
+
+  <div class="card">
+    <h2>1. Academic Early Warning & Risk Intervention Process</h2>
+    <div class="mermaid">
+flowchart TD
+    Start([Start: Risk Evaluation Triggered]) --> FetchData[Fetch Student Telemetry: Attendance, Submissions, Grades]
+    FetchData --> InvokeAI[Invoke FastAPI AI Risk Agent]
+    InvokeAI --> CalculateScore[Calculate At-Risk Score: 0.0 - 1.0]
+
+    CalculateScore --> RiskCheck{Risk Level?}
+    
+    RiskCheck -- Score < 0.40 --> LowRisk[Mark Student as LOW Risk]
+    LowRisk --> StandardReport[Log standard academic progress]
+    StandardReport --> EndRoutine([End Workflow])
+
+    RiskCheck -- 0.40 <= Score < 0.70 --> MedRisk[Mark Student as MEDIUM Risk]
+    MedRisk --> GenRecommend[AI Engine Generates Study Recommendations]
+    GenRecommend --> SendStudAlert[Send Advisory Tip to Student]
+    SendStudAlert --> NotifyAdvMed[Notify Assigned Advisor: Monitor Mode]
+    NotifyAdvMed --> EndRoutine
+
+    RiskCheck -- Score >= 0.70 --> HighRisk[Mark Student as HIGH Risk]
+    HighRisk --> TriggerUrgent[Trigger Early Warning Alert]
+    TriggerUrgent --> NotifyAdvHigh[Send Urgent Alert to Academic Advisor]
+    NotifyAdvHigh --> DraftPlan[Advisor Drafts Intervention Plan]
+    DraftPlan --> ScheduleCounseling[Schedule Counseling Session]
+    ScheduleCounseling --> ExecuteIntervention[Execute & Log Counseling Notes]
+    ExecuteIntervention --> CompletePlan[Mark Plan Status: COMPLETED]
+    CompletePlan --> EndRoutine
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Faculty Attendance Marking & Grade Submission Workflow</h2>
+    <div class="mermaid">
+flowchart TD
+    Start([Start: Faculty Accesses Portal]) --> SelectCourse[Select Assigned Course & Session]
+    SelectCourse --> ActionType{Select Action}
+    
+    ActionType -- Mark Attendance --> FetchRoster[System Fetches Student Roster]
+    FetchRoster --> DisplayAttendanceUI[Render Interactive Attendance Sheet]
+    DisplayAttendanceUI --> InputAttendance[Faculty Marks: Present / Absent / Late / Excused]
+    InputAttendance --> SubmitAttendance[Click Save Attendance]
+    SubmitAttendance --> PersistAtt[Persist AttendanceRecords in PostgreSQL]
+    PersistAtt --> EndAtt([Attendance Workflow Complete])
+
+    ActionType -- Submit Grades --> SelectAssessment[Select Assessment Category]
+    SelectAssessment --> DisplayGradeUI[Render Grade Input Table]
+    DisplayGradeUI --> EnterScores[Faculty Enters Scores per Student]
+    EnterScores --> SubmitGrades[Click Publish Grades]
+    SubmitGrades --> PersistGrades[Save AssessmentGrade / Grade Records]
+    PersistGrades --> TriggerRiskEval[Trigger Async Risk Evaluation for Low Scorers]
+    TriggerRiskEval --> EndGrade([Grade Workflow Complete])
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Student Course Registration Workflow</h2>
+    <div class="mermaid">
+flowchart TD
+    Start([Start: Student Initiates Registration]) --> OpenCatalog[Browse Available Courses for Active Semester]
+    OpenCatalog --> SelectCourse[Select Course to Add]
+    SelectCourse --> CheckPrereq{Prerequisites Satisfied?}
+    
+    CheckPrereq -- No --> PrereqErr[Display Warning: Missing Prerequisite]
+    PrereqErr --> OpenCatalog
+
+    CheckPrereq -- Yes --> CheckCapacity{Class Seat Available?}
+    CheckCapacity -- No --> CapErr[Display Notice: Section Full]
+    CapErr --> OpenCatalog
+
+    CheckCapacity -- Yes --> CheckScheduleConflict{Time Conflict with Enrolled Class?}
+    CheckScheduleConflict -- Yes --> ConflictErr[Display Error: Schedule Overlap]
+    ConflictErr --> OpenCatalog
+
+    CheckScheduleConflict -- No --> CreateEnrollment[Create Enrollment record status='ACTIVE']
+    CreateEnrollment --> DisplaySchedule[Refresh Personal Class Timetable]
+    DisplaySchedule --> ConfirmReg([Registration Complete])
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>

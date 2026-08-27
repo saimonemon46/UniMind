@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sequence Diagrams — UniMind Visual Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+    .card { background: #ffffff; color: #000; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    h1, h2 { color: #38bdf8; }
+    .card h2 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .mermaid { display: flex; justify-content: center; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>⚡ UniMind Sequence Diagrams (Visual Shapes)</h1>
+
+  <div class="card">
+    <h2>1. AI At-Risk Evaluation & Advisor Early Warning Flow</h2>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Student
+    participant UI as React Frontend UI
+    participant Backend as Django REST API
+    participant DB as PostgreSQL Database
+    participant Celery as Async Celery Worker
+    participant AI as FastAPI AI Service (LangGraph)
+    participant Groq as Groq LLM API (llama3-70b)
+    actor Advisor
+
+    Student->>UI: Misses class / Fails Assignment
+    UI->>Backend: POST /api/attendance/ OR POST /api/grades/
+    Backend->>DB: Save AttendanceRecord / AssessmentGrade
+    Backend->>Celery: Trigger evaluate_student_risk_task(student_id)
+    
+    activate Celery
+    Celery->>DB: Fetch attendance history, grades, CGPA
+    DB-->>Celery: Return academic telemetry
+    Celery->>AI: POST /ai/risk/evaluate (student payload)
+    
+    activate AI
+    AI->>Groq: Query risk analysis prompt
+    Groq-->>AI: Return JSON (risk_score=0.78, level="HIGH")
+    AI-->>Celery: Return Risk Assessment Result
+    deactivate AI
+    
+    Celery->>DB: Update StudentProfile.risk_level = "HIGH"
+    Celery->>DB: Create Notification(recipient=Advisor, kind="RISK_ALERT")
+    deactivate Celery
+
+    Advisor->>UI: Open Advisor Dashboard
+    UI->>Backend: GET /api/advisors/assigned-students/
+    Backend->>DB: Query students (order by risk DESC)
+    DB-->>Backend: Return at-risk student list
+    Backend-->>UI: Display At-Risk Banner & High-Risk Badges
+    UI-->>Advisor: Render At-Risk Alert for Student
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Student Assignment Submission & Automated Feedback Flow</h2>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Student
+    participant UI as React Student Portal
+    participant API as Django REST API
+    participant Storage as File Storage (MinIO)
+    participant DB as PostgreSQL DB
+    participant AI as FastAPI AI Service
+    participant Groq as Groq LLM API
+
+    Student->>UI: Select Assignment & Upload Solution
+    UI->>API: POST /api/assignments/{id}/submit/
+    API->>Storage: Store Submission File
+    Storage-->>API: Return file_url
+    API->>DB: Create Submission (status="SUBMITTED")
+    DB-->>API: Saved Submission instance
+
+    opt Real-time AI Feedback Generation
+        API->>AI: POST /ai/lessons/evaluate-submission
+        activate AI
+        AI->>Groq: Generate feedback & score recommendation
+        Groq-->>AI: Return feedback & recommended score
+        AI-->>API: Feedback response payload
+        deactivate AI
+        API->>DB: Update Submission (feedback=AI_feedback, status="GRADED")
+    end
+
+    API-->>UI: 201 Created (Submission Success + Feedback Preview)
+    UI-->>Student: Display "Submitted" status with instant AI feedback
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. AI Advisory Chatbot Interaction Flow</h2>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Student
+    participant Chat as React Floating AIAssistant Widget
+    participant FastApiAI as FastAPI Microservice (/ai/chatbot)
+    participant RedisMemory as Redis Conversation Cache
+    participant LangChain as LangChain Agent
+    participant Groq as Groq LLM API (llama3-70b-8192)
+
+    Student->>Chat: Type question ("What prerequisites do I need for ML?")
+    Chat->>FastApiAI: POST /ai/chatbot/query
+    activate FastApiAI
+    FastApiAI->>RedisMemory: GET chat_history:{session_id}
+    RedisMemory-->>FastApiAI: Return prior message buffer
+    FastApiAI->>LangChain: Execute Prompt with Context + Query
+    LangChain->>Groq: POST completions API
+    Groq-->>LangChain: Streamed text response
+    LangChain-->>FastApiAI: Compiled AI response
+    FastApiAI->>RedisMemory: UPDATE chat_history (append turn)
+    FastApiAI-->>Chat: JSON Response
+    deactivate FastApiAI
+    Chat-->>Student: Render response formatted in Markdown
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>
